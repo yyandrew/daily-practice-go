@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"dailypractice/utils"
+	"fmt"
 	"log"
 	"time"
 
@@ -23,22 +24,24 @@ type Userslice struct {
 	Users []User `json:"users"`
 }
 
-func All() Userslice {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+var (
+	ctx        context.Context
+	cancel     context.CancelFunc
+	collection *mongo.Collection
+)
+
+func init() {
+	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	utils.CheckError(err)
 
-	defer func() {
-		if err := client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
+	collection = client.Database("daily-practice").Collection("users")
+}
 
-	connection := client.Database("daily-practice").Collection("users")
+func All() Userslice {
 	users := Userslice{}
 
-	cur, err := connection.Find(ctx, bson.D{})
+	cur, err := collection.Find(ctx, bson.D{})
 	utils.CheckError((err))
 	defer cur.Close(ctx)
 
@@ -51,6 +54,16 @@ func All() Userslice {
 	}
 
 	return users
+}
+
+func FindByEmail(email string) (User, error) {
+	filter := bson.D{{"email", email}}
+	user := User{}
+	err := collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return user, err
 }
 
 func (u *User) AuthByPassword(plainPW string) bool {
