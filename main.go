@@ -1,9 +1,9 @@
 package main
 
 import (
+	"dailypractice/controllers"
 	"dailypractice/tip"
 	"dailypractice/user"
-	"dailypractice/utils"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -14,9 +14,24 @@ import (
 )
 
 func getTips(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"data": tip.All(),
-	})
+	category := c.DefaultQuery("category", "vim")
+	fmt.Printf("category: %s\n", category)
+	c.JSON(http.StatusOK, tip.All(category).Tips)
+}
+
+func deleteTip(c *gin.Context) {
+	id := c.Param("id")
+	res, ok := tip.Delete(id)
+	if ok {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+			"tip":     res,
+		})
+	} else {
+		c.JSON(http.StatusNotAcceptable, gin.H{
+			"message": "unable to deleted tip",
+		})
+	}
 }
 
 func getUsers(c *gin.Context) {
@@ -44,32 +59,15 @@ func upload(c *gin.Context) {
 	}
 }
 
-func login(c *gin.Context) {
-	email := c.PostForm("email")
-	plainPW := c.PostForm("password")
-
-	user, err := user.FindByEmail(email)
-	fmt.Printf("emai: %s, password: %s, user: %+v", email, plainPW, user)
-	utils.CheckError(err)
-
-	if user.AuthByPassword(plainPW) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "ok",
-			"user":    map[string]string{"email": user.Email},
-		})
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "error",
-		})
-	}
-}
-
 func main() {
 	router := gin.Default()
 	router.Static("public", "./public")
-	router.GET("api/tips", getTips)
-	router.GET("api/users", getUsers)
-	router.POST("api/login", login)
+	public := router.Group("/api")
+	public.GET("/tips", getTips)
+	public.DELETE("/tips/:id", deleteTip)
+	public.GET("/users", getUsers)
+	public.POST("/signup", controllers.SignUp)
+	public.POST("/login", controllers.Login)
 	router.POST("api/upload", upload)
 	router.Run(":9000")
 }
