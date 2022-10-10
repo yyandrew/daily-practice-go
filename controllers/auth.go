@@ -16,6 +16,10 @@ type RegisterInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+type LoginInput struct {
+	RegisterInput
+}
+
 func SignUp(c *gin.Context) {
 	var input RegisterInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -33,8 +37,11 @@ func SignUp(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	email := c.PostForm("email")
-	plainPW := c.PostForm("password")
+	loginForm := LoginInput{}
+	c.Bind(&loginForm)
+
+	email := loginForm.Email
+	plainPW := loginForm.Password
 
 	currentUser, err := user.FindByEmail(email)
 	utils.CheckError(err)
@@ -45,10 +52,9 @@ func Login(c *gin.Context) {
 		if err != nil {
 			fmt.Printf("error!: %+v", err)
 		}
-		fmt.Printf("token: %s\n", jwtToken)
 		c.SetCookie("token", jwtToken, 60*60*24, "", "daily-practice.ky2020.click", true, true)
 		c.JSON(http.StatusOK, gin.H{
-			"message": "ok",
+			"message": "Login sucessfully",
 			"user":    map[string]string{"email": currentUser.Email},
 		})
 	} else {
