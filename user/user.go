@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	// "dailypractice/tip"
+	"dailypractice/tip"
 	"dailypractice/utils"
 	"fmt"
 	"log"
@@ -63,6 +65,18 @@ func All() Userslice {
 	return users
 }
 
+func (u *User) Tips() (interface{}, error) {
+	fmt.Println(u.Id)
+	tips, err := tip.FilterByUserId(string(u.Id))
+	if err != nil {
+		fmt.Println(err)
+		return tips, err
+	}
+
+  fmt.Printf("tips of user: %v\n", tips)
+	return tips, nil
+}
+
 func FindByEmail(email string) (User, error) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	filter := bson.D{{"email", email}}
@@ -71,6 +85,24 @@ func FindByEmail(email string) (User, error) {
 	err := collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		fmt.Println(err)
+	}
+	return user, err
+}
+
+func FindById(id string) (interface{}, error) {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	objectId, err := primitive.ObjectIDFromHex(id)
+	user := User{}
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"_id", objectId}}
+	collection := getCollection(ctx)
+	err1 := collection.FindOne(ctx, filter).Decode(&user)
+	if err1 != nil {
+		fmt.Println(err)
+		return nil, err
 	}
 	return user, err
 }
@@ -95,11 +127,6 @@ func Save(email string, password string) (interface{}, bool) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	collection := getCollection(ctx)
 	res, err := collection.InsertOne(ctx, bson.D{{"email", email}, {"cryptedPassword", string(cryptedPassword)}})
-	if err != nil {
-		fmt.Println(err)
-		return nil, false
-	}
-
 	if err != nil {
 		fmt.Println(err)
 		return nil, false

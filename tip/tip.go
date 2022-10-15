@@ -17,6 +17,7 @@ type Tip struct {
 	Context  string             `json:"context"`
 	ImageURL string             `json:"imageUrl"`
 	Category string             `json:"category"`
+	UserId   primitive.ObjectID `bson:"user_id" json:"user_id"`
 }
 
 type Tipslice struct {
@@ -57,7 +58,7 @@ func Delete(id string) (Tip, bool) {
 	defer cancel()
 
 	deletedTip := Tip{}
-  fmt.Printf("id: %s\n", id)
+	fmt.Printf("id: %s\n", id)
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	utils.CheckError(err)
@@ -75,4 +76,47 @@ func Delete(id string) (Tip, bool) {
 	}
 
 	return deletedTip, ok
+}
+
+func Create(content string, category string, imageUrl string, user_id string) (interface{}, error) {
+	newTip := Tip{}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection := getCollection(ctx)
+	res, err := collection.InsertOne(ctx, bson.D{{"context", content}, {"category", category}, {"imageUrl", imageUrl}, {"user_id", user_id}})
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	fmt.Printf("res %v", res.InsertedID)
+
+	collection.FindOne(ctx, bson.D{{"_id", res.InsertedID}}).Decode(&newTip)
+	fmt.Printf("new tip: %v", newTip)
+
+	return newTip, nil
+}
+
+func FilterByUserId(user_id string) (Tipslice, error) {
+	s := Tipslice{Tips: make([]Tip, 0)}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection := getCollection(ctx)
+	cur, err := collection.Find(ctx, bson.D{{"user_id", user_id}})
+	if err != nil {
+		return s, err
+	}
+	for cur.Next(ctx) {
+		var result = Tip{}
+		err := cur.Decode(&result)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		s.Tips = append([]Tip{result}, s.Tips...)
+	}
+	return s, nil
 }

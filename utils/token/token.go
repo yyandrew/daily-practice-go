@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -37,6 +38,9 @@ func GenerateToken(user_id string) (string, error) {
 
 func TokenValid(c *gin.Context) (string, error) {
 	tokenString := ExtractToken(c)
+	if tokenString == "" {
+		return "", errors.New("Can't find token")
+	}
 	tokenWithClaim, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"])
