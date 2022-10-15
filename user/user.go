@@ -5,11 +5,8 @@ import (
 	"dailypractice/utils"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	jwt "github.com/appleboy/gin-jwt/v2"
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -111,46 +108,4 @@ func Save(email string, password string) (interface{}, bool) {
 	collection.FindOne(ctx, bson.D{{"_id", res.InsertedID}}).Decode(&user)
 
 	return user, true
-}
-
-func AuthMiddleware(c *gin.Context) (interface{}, error) {
-	identityKey := "email"
-
-	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       "test zone",
-		Key:         []byte(os.Getenv("JWT_SECRET ")),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
-		IdentityKey: identityKey,
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*User); ok {
-				return jwt.MapClaims{
-					identityKey: v.Email,
-				}
-			}
-
-			return jwt.MapClaims{}
-		},
-		IdentityHandler: func(c *gin.Context) interface{} {
-			claims := jwt.ExtractClaims(c)
-			return &User{
-				Email: claims[identityKey].(string),
-			}
-		},
-		Authenticator: func(c *gin.Context) (interface{}, error) {
-			email := c.PostForm("email")
-			plainPW := c.PostForm("password")
-
-			user, err := FindByEmail(email)
-			utils.CheckError(err)
-
-			if user.AuthByPassword(plainPW) {
-				return user, nil
-			} else {
-				return nil, jwt.ErrFailedAuthentication
-			}
-		},
-	})
-
-	return authMiddleware, err
 }
