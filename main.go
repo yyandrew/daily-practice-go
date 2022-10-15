@@ -9,17 +9,27 @@ import (
 	"dailypractice/utils/token"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type TipForm struct {
 	Context  string `form:"context"`
 	Category string `form:"category"`
 	ImageUrl string `form:"imageUrl"`
+}
+
+var IMG_PATH string
+
+func init() {
+	err := godotenv.Load()
+	utils.CheckError(err)
+	IMG_PATH = os.Getenv("IMG_PATH")
 }
 
 func getTips(c *gin.Context) {
@@ -56,7 +66,7 @@ func getUsers(c *gin.Context) {
 func upload(c *gin.Context) {
 	fileParam := "tip-image"
 	file, _ := c.FormFile(fileParam)
-	dst := "./public/img/" + fileParam + strconv.FormatInt(time.Now().Unix(), 10) + filepath.Ext(file.Filename)
+	dst := IMG_PATH + fileParam + strconv.FormatInt(time.Now().Unix(), 10) + filepath.Ext(file.Filename)
 	err := c.SaveUploadedFile(file, dst)
 
 	if err == nil {

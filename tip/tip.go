@@ -4,8 +4,10 @@ import (
 	"context"
 	"dailypractice/utils"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,6 +24,14 @@ type Tip struct {
 
 type Tipslice struct {
 	Tips []Tip `json:"tips"`
+}
+
+var IMG_PATH string
+
+func init() {
+	err := godotenv.Load()
+	utils.CheckError(err)
+	IMG_PATH = os.Getenv("IMG_PATH")
 }
 
 func getCollection(ctx context.Context) *mongo.Collection {
@@ -71,6 +81,14 @@ func Delete(id string) (Tip, bool) {
 	if err != nil {
 		fmt.Println(err.Error())
 		ok = false
+	}
+	fmt.Printf("image!!! %s\n", IMG_PATH+deletedTip.ImageURL)
+	if deletedTip.ImageURL != "" {
+		err = os.Remove(IMG_PATH + deletedTip.ImageURL)
+		if err != nil {
+			fmt.Errorf(err.Error())
+			return deletedTip, false
+		}
 	}
 
 	return deletedTip, ok
