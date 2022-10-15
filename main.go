@@ -25,6 +25,7 @@ type TipForm struct {
 func getTips(c *gin.Context) {
 	var tips = make([]tip.Tip, 0)
 	category := c.DefaultQuery("category", "vim")
+	content := c.DefaultQuery("context", "")
 	user_id, err := token.ExtractTokenID(c)
 	if err != nil {
 		fmt.Errorf(err.Error())
@@ -33,7 +34,7 @@ func getTips(c *gin.Context) {
 	result, err := user.FindById(user_id)
 	if err == nil {
 		currentUser := result.(user.User)
-		userTips, err := currentUser.Tips()
+		userTips, err := currentUser.Tips(category, content)
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -44,21 +45,6 @@ func getTips(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, tips)
-}
-
-func deleteTip(c *gin.Context) {
-	id := c.Param("id")
-	res, ok := tip.Delete(id)
-	if ok {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "ok",
-			"tip":     res,
-		})
-	} else {
-		c.JSON(http.StatusNotAcceptable, gin.H{
-			"message": "unable to deleted tip",
-		})
-	}
 }
 
 func getUsers(c *gin.Context) {
@@ -123,5 +109,6 @@ func main() {
 	public.POST("/login", controllers.Login)
 	router.POST("api/upload", upload)
 	public.POST("/tips", middlewares.JwtAuthMiddleware(), createTip)
+	public.DELETE("/tips/:id", middlewares.JwtAuthMiddleware(), controllers.DeleteTip)
 	router.Run(":9000")
 }

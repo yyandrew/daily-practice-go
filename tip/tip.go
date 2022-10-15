@@ -98,14 +98,21 @@ func Create(content string, category string, imageUrl string, user_id string) (i
 	return newTip, nil
 }
 
-func FilterByUserId(user_id string) (Tipslice, error) {
+func FilterByUserId(user_id string, category string, content string) (Tipslice, error) {
 	s := Tipslice{Tips: make([]Tip, 0)}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	collection := getCollection(ctx)
-	cur, err := collection.Find(ctx, bson.D{{"user_id", user_id}})
+	filter := bson.D{{"user_id", user_id}}
+	if category != "" {
+		filter = append(filter, bson.E{"category", category})
+	}
+	if content != "" {
+		filter = append(filter, bson.E{"context", primitive.Regex{Pattern: content, Options: ""}})
+	}
+	cur, err := collection.Find(ctx, filter)
 	if err != nil {
 		return s, err
 	}

@@ -65,15 +65,14 @@ func All() Userslice {
 	return users
 }
 
-func (u *User) Tips() (interface{}, error) {
+func (u *User) Tips(category string, content string) (interface{}, error) {
 	fmt.Println(u.Id)
-	tips, err := tip.FilterByUserId(string(u.Id))
+	tips, err := tip.FilterByUserId(string(u.Id), category, content)
 	if err != nil {
 		fmt.Println(err)
 		return tips, err
 	}
 
-  fmt.Printf("tips of user: %v\n", tips)
 	return tips, nil
 }
 
