@@ -54,11 +54,11 @@ func All(category string) Tipslice {
 }
 
 func Delete(id string) (Tip, bool) {
+	ok := true
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	deletedTip := Tip{}
-	fmt.Printf("id: %s\n", id)
 
 	objectId, err := primitive.ObjectIDFromHex(id)
 	utils.CheckError(err)
@@ -67,11 +67,9 @@ func Delete(id string) (Tip, bool) {
 	collection.FindOne(ctx, filter).Decode(&deletedTip)
 	utils.CheckError(err)
 
-	res, err := collection.DeleteOne(ctx, filter)
-	utils.CheckError(err)
-	fmt.Printf("res: %+v", res)
-	ok := true
+	_, err = collection.DeleteOne(ctx, filter)
 	if err != nil {
+		fmt.Println(err.Error())
 		ok = false
 	}
 

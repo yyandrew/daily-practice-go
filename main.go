@@ -81,7 +81,6 @@ func createTip(c *gin.Context) {
 
 	user_id, err := token.ExtractTokenID(c)
 	utils.CheckError(err)
-	fmt.Printf("user_id %s\n", user_id)
 	result, err := user.FindById(user_id)
 	if err != nil {
 		fmt.Println(err)
