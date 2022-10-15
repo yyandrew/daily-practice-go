@@ -1,13 +1,16 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"dailypractice/user"
 	"dailypractice/utils"
 	"dailypractice/utils/token"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type RegisterInput struct {
@@ -17,6 +20,15 @@ type RegisterInput struct {
 
 type LoginInput struct {
 	RegisterInput
+}
+
+var DOMAIN string
+
+func init() {
+	err := godotenv.Load()
+	utils.CheckError(err)
+	DOMAIN = os.Getenv("DOMAIN")
+	fmt.Printf("DOMAIN %s\n", DOMAIN)
 }
 
 func SignUp(c *gin.Context) {
@@ -49,7 +61,7 @@ func Login(c *gin.Context) {
 		jwtToken, err := token.GenerateToken(string(currentUser.Id))
 
 		utils.CheckError(err)
-		c.SetCookie("token", jwtToken, 60*60*24, "/", "localhost", true, true)
+		c.SetCookie("token", jwtToken, 60*60*24, "/", DOMAIN, true, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Login sucessfully",
 			"user":    map[string]string{"email": currentUser.Email},

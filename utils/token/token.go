@@ -22,6 +22,7 @@ func init() {
 	err := godotenv.Load()
 	utils.CheckError(err)
 	JWT_SECRET = os.Getenv("JWT_SECRET")
+	fmt.Printf("JWT_SECRET %s\n", JWT_SECRET)
 }
 
 func GenerateToken(user_id string) (string, error) {
