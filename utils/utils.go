@@ -12,5 +12,7 @@ func PanicError(err error) {
 func CheckError(err error) {
 	if err != nil {
 		fmt.Printf("error!: %+v", err)
+
+		return
 	}
 }

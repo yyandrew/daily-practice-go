@@ -49,10 +49,8 @@ func Login(c *gin.Context) {
 	if currentUser.AuthByPassword(plainPW) {
 		jwtToken, err := token.GenerateToken(string(currentUser.Id))
 
-		if err != nil {
-			fmt.Printf("error!: %+v", err)
-		}
-		c.SetCookie("token", jwtToken, 60*60*24, "", "daily-practice.ky2020.click", true, true)
+		utils.CheckError(err)
+		c.SetCookie("token", jwtToken, 60*60*24, "/", "localhost", true, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Login sucessfully",
 			"user":    map[string]string{"email": currentUser.Email},

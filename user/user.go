@@ -142,7 +142,6 @@ func AuthMiddleware(c *gin.Context) (interface{}, error) {
 			plainPW := c.PostForm("password")
 
 			user, err := FindByEmail(email)
-			fmt.Printf("emai: %s, password: %s, user: %+v", email, plainPW, user)
 			utils.CheckError(err)
 
 			if user.AuthByPassword(plainPW) {

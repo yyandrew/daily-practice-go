@@ -2,8 +2,11 @@ package main
 
 import (
 	"dailypractice/controllers"
+	"dailypractice/middlewares"
 	"dailypractice/tip"
 	"dailypractice/user"
+	"dailypractice/utils"
+	"dailypractice/utils/token"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -15,7 +18,6 @@ import (
 
 func getTips(c *gin.Context) {
 	category := c.DefaultQuery("category", "vim")
-	fmt.Printf("category: %s\n", category)
 	c.JSON(http.StatusOK, tip.All(category).Tips)
 }
 
@@ -59,15 +61,23 @@ func upload(c *gin.Context) {
 	}
 }
 
+func createTip(c *gin.Context) {
+	user_id, err := token.ExtractTokenID(c)
+	utils.CheckError(err)
+	fmt.Printf("user_id %s\n", user_id)
+	fmt.Printf("create tip\n")
+}
+
 func main() {
 	router := gin.Default()
+
 	router.Static("public", "./public")
 	public := router.Group("/api")
 	public.GET("/tips", getTips)
-	public.DELETE("/tips/:id", deleteTip)
 	public.GET("/users", getUsers)
 	public.POST("/signup", controllers.SignUp)
 	public.POST("/login", controllers.Login)
 	router.POST("api/upload", upload)
+	public.POST("/tips", middlewares.JwtAuthMiddleware(), createTip)
 	router.Run(":9000")
 }

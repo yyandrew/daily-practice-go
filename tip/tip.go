@@ -27,12 +27,6 @@ func getCollection(ctx context.Context) *mongo.Collection {
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	utils.CheckError(err)
 
-	// defer func() {
-	// if err := client.Disconnect(ctx); err != nil {
-	// panic(err)
-	// }
-	// }()
-
 	collection := client.Database("daily-practice").Collection("tips")
 	return collection
 }
