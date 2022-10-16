@@ -69,6 +69,7 @@ func CreateTip(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		newTip := result.(tip.Tip)
+		newTip.Deletable = true
 		c.JSON(http.StatusOK, newTip)
 	}
 }
