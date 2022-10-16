@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	// "dailypractice/tip"
-	"dailypractice/tip"
 	"dailypractice/utils"
 	"fmt"
 	"log"
@@ -63,17 +62,6 @@ func All() Userslice {
 	}
 
 	return users
-}
-
-func (u *User) Tips(category string, content string) (interface{}, error) {
-	fmt.Println(u.Id)
-	tips, err := tip.FilterByUserId(string(u.Id), category, content)
-	if err != nil {
-		fmt.Println(err)
-		return tips, err
-	}
-
-	return tips, nil
 }
 
 func FindByEmail(email string) (User, error) {
