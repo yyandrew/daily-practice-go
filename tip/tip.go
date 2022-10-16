@@ -79,19 +79,13 @@ func Delete(id string) (Tip, bool) {
 	defer cancel()
 
 	deletedTip := Tip{}
-
-	objectId, err := primitive.ObjectIDFromHex(id)
-	utils.CheckError(err)
-	filter := bson.D{{"_id", objectId}}
 	collection := getCollection(ctx)
-	collection.FindOne(ctx, filter).Decode(&deletedTip)
-	utils.CheckError(err)
-
-	_, err = collection.DeleteOne(ctx, filter)
+	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		fmt.Println(err.Error())
-		ok = false
+		return deletedTip, false
 	}
+
+	collection.FindOneAndDelete(ctx, bson.D{{"_id", objectId}}).Decode(&deletedTip)
 	fmt.Printf("image!!! %s\n", IMG_PATH+deletedTip.ImageURL)
 	if deletedTip.ImageURL != "" {
 		err = os.Remove(IMG_PATH + deletedTip.ImageURL)
@@ -122,4 +116,20 @@ func Create(content string, category string, imageUrl string, user_id string) (i
 	fmt.Printf("new tip: %v", newTip)
 
 	return newTip, nil
+}
+
+func FindById(id string) (Tip, bool) {
+	ok := true
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	tip := Tip{}
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	utils.CheckError(err)
+	filter := bson.D{{"_id", objectId}}
+	collection := getCollection(ctx)
+	collection.FindOne(ctx, filter).Decode(&tip)
+
+	return tip, ok
 }

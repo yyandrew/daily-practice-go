@@ -31,7 +31,23 @@ func GetTips(c *gin.Context) {
 }
 
 func DeleteTip(c *gin.Context) {
+	user_id, err := token.ExtractTokenID(c)
+	if err != nil {
+		c.JSON(http.StatusNotAcceptable, gin.H{
+			"message": "unable to deleted tip",
+		})
+		return
+	}
+
 	id := c.Param("id")
+	deletedTip, ok := tip.FindById(id)
+	if !ok || deletedTip.UserId.Hex() != user_id {
+		c.JSON(http.StatusNotAcceptable, gin.H{
+			"message": "unable to deleted tip",
+		})
+		return
+	}
+
 	res, ok := tip.Delete(id)
 	if ok {
 		c.JSON(http.StatusOK, gin.H{
