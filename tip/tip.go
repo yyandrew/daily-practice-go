@@ -3,11 +3,11 @@ package tip
 import (
 	"context"
 	"dailypractice/utils"
+	. "dailypractice/utils/constants"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,14 +25,6 @@ type Tip struct {
 
 type Tipslice struct {
 	Tips []Tip `json:"tips"`
-}
-
-var IMG_PATH string
-
-func init() {
-	err := godotenv.Load()
-	utils.CheckError(err)
-	IMG_PATH = os.Getenv("IMG_PATH")
 }
 
 func getCollection(ctx context.Context) *mongo.Collection {

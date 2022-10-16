@@ -3,27 +3,15 @@ package token
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"time"
 
 	"dailypractice/utils"
+	. "dailypractice/utils/constants"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 )
-
-var (
-	JWT_SECRET string
-)
-
-func init() {
-	err := godotenv.Load()
-	utils.CheckError(err)
-	JWT_SECRET = os.Getenv("JWT_SECRET")
-	fmt.Printf("JWT_SECRET %s\n", JWT_SECRET)
-}
 
 func GenerateToken(user_id string) (string, error) {
 	token_lifespan := 24

@@ -1,16 +1,14 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 
 	"dailypractice/user"
 	"dailypractice/utils"
+	. "dailypractice/utils/constants"
 	"dailypractice/utils/token"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 type RegisterInput struct {
@@ -20,15 +18,6 @@ type RegisterInput struct {
 
 type LoginInput struct {
 	RegisterInput
-}
-
-var DOMAIN string
-
-func init() {
-	err := godotenv.Load()
-	utils.CheckError(err)
-	DOMAIN = os.Getenv("DOMAIN")
-	fmt.Printf("DOMAIN %s\n", DOMAIN)
 }
 
 func SignUp(c *gin.Context) {
@@ -71,4 +60,11 @@ func Login(c *gin.Context) {
 			"message": "error",
 		})
 	}
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie("token", "", 0, "/", DOMAIN, true, true)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logout successfully",
+	})
 }

@@ -1,25 +1,15 @@
 package controllers
 
 import (
-	"dailypractice/utils"
+	. "dailypractice/utils/constants"
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
-
-var IMG_PATH string
-
-func init() {
-	err := godotenv.Load()
-	utils.CheckError(err)
-	IMG_PATH = os.Getenv("IMG_PATH")
-}
 
 func Upload(c *gin.Context) {
 	fileParam := "tip-image"
