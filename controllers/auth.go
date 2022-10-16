@@ -64,7 +64,7 @@ func Login(c *gin.Context) {
 		c.SetCookie("token", jwtToken, 60*60*24, "/", DOMAIN, true, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Login sucessfully",
-			"user":    map[string]string{"email": currentUser.Email},
+			"user":    map[string]string{"email": currentUser.Email, "id": string(currentUser.Id)},
 		})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{

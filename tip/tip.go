@@ -15,11 +15,12 @@ import (
 )
 
 type Tip struct {
-	Id       primitive.ObjectID `bson:"_id" json:"_id"`
-	Context  string             `json:"context"`
-	ImageURL string             `json:"imageUrl"`
-	Category string             `json:"category"`
-	UserId   primitive.ObjectID `bson:"user_id" json:"user_id"`
+	Id        primitive.ObjectID `bson:"_id" json:"_id"`
+	Context   string             `json:"context"`
+	ImageURL  string             `json:"imageUrl"`
+	Category  string             `json:"category"`
+	UserId    primitive.ObjectID `bson:"user_id" json:"user_id"`
+	Deletable bool               `json:"deletable"`
 }
 
 type Tipslice struct {
@@ -42,20 +43,29 @@ func getCollection(ctx context.Context) *mongo.Collection {
 	return collection
 }
 
-func All(category string) Tipslice {
+func All(category string, content string, user_id string) Tipslice {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	collection := getCollection(ctx)
 
 	s := Tipslice{Tips: make([]Tip, 0)}
 
-	cur, err := collection.Find(ctx, bson.D{{"category", category}})
+	filter := bson.D{{"category", category}}
+	if content != "" {
+		filter = append(filter, bson.E{"context", content})
+	}
+	cur, err := collection.Find(ctx, filter)
 	utils.CheckError((err))
 
 	for cur.Next(ctx) {
 		var result = Tip{}
 		err := cur.Decode(&result)
 		utils.CheckError(err)
+		if user_id != "" && result.UserId.Hex() == user_id {
+			result.Deletable = true
+		} else {
+			result.Deletable = false
+		}
 
 		s.Tips = append([]Tip{result}, s.Tips...)
 	}

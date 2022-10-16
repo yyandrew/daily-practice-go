@@ -4,6 +4,7 @@ import (
 	"dailypractice/tip"
 	"dailypractice/user"
 	"dailypractice/utils/token"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,23 +22,10 @@ func GetTips(c *gin.Context) {
 	content := c.DefaultQuery("context", "")
 	user_id, err := token.ExtractTokenID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		fmt.Errorf(err.Error())
 	}
 
-	result, err := user.FindById(user_id)
-	if err == nil {
-		currentUser := result.(user.User)
-		userTips, err := currentUser.Tips(category, content)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		} else {
-			tips = userTips.(tip.Tipslice).Tips
-		}
-	} else {
-		tips = tip.All(category).Tips
-	}
+	tips = tip.All(category, content, user_id).Tips
 
 	c.JSON(http.StatusOK, tips)
 }
