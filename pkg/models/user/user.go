@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	// "dailypractice/tip"
 	"dailypractice/utils"
 	"fmt"
 	"log"

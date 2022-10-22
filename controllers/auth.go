@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"dailypractice/user"
+	"dailypractice/pkg/models/user"
 	"dailypractice/utils"
 	. "dailypractice/utils/constants"
 	"dailypractice/utils/token"

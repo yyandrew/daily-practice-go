@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"dailypractice/tip"
-	"dailypractice/user"
+	"dailypractice/pkg/models/tip"
+	"dailypractice/pkg/models/user"
 	"dailypractice/utils/token"
 	"fmt"
 	"net/http"
