@@ -1,15 +1,21 @@
 package main
 
 import (
+	"dailypractice/config"
 	"dailypractice/controllers"
 	"dailypractice/middlewares"
 	. "dailypractice/utils/constants"
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	cnf, err := config.NewParsedConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	router := gin.Default()
 	fmt.Printf("IMG_PATH: %s\n", IMG_PATH)
 
@@ -22,5 +28,5 @@ func main() {
 	router.POST("api/upload", controllers.Upload)
 	public.POST("/tips", middlewares.JwtAuthMiddleware(), controllers.CreateTip)
 	public.DELETE("/tips/:id", middlewares.JwtAuthMiddleware(), controllers.DeleteTip)
-	router.Run(":9000")
+	router.Run(fmt.Sprintf(":%d", cnf.ServerPort))
 }
